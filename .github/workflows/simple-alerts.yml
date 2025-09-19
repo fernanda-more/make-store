@@ -1,0 +1,39 @@
+name: Simple Discord Alerts
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    types: [opened, closed]
+
+jobs:
+  discord-notify:
+    runs-on: ubuntu-latest
+    if: always()
+    
+    steps:
+      - name: Send Discord Notification
+        uses: Ilshidur/action-discord@master
+        env:
+          DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        with:
+          args: |
+            🔔 **GitHub Actions Alert**
+            
+            **Evento:** ${{ github.event_name }}
+            **Repositório:** ${{ github.repository }}
+            **Branch:** ${{ github.ref_name }}
+            **Autor:** ${{ github.actor }}
+            **Status:** ${{ job.status }}
+            
+            {% if github.event_name == 'push' %}
+            **Commit:** ${{ github.sha }}
+            **Mensagem:** ${{ github.event.head_commit.message }}
+            {% endif %}
+            
+            {% if github.event_name == 'pull_request' %}
+            **PR:** ${{ github.event.pull_request.title }}
+            **Ação:** ${{ github.event.action }}
+            {% endif %}
+            
+            **Timestamp:** ${{ github.event.head_commit.timestamp }}
